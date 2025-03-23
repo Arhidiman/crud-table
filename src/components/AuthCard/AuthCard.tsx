@@ -1,9 +1,12 @@
 import { Button, Card, CardContent, TextField, Typography } from "@mui/material"
-import { useAppDispatch, useAppSelector } from "@/main";
+import { AppStore, RootState, useAppDispatch, useAppSelector } from "@/main";
 import { SET_USERNAME, SET_PASSWORD } from "./store/actionsTypes";
-import type { ChangeEventHandler } from "react";
+import { authenticate } from "@/ApiClient/ApiClient";
+import { useState, type ChangeEventHandler } from "react";
 
 export const AuthCard: React.FC = () => {
+
+    const [data, setData] = useState<any>(null)
 
     const dispatch = useAppDispatch()
 
@@ -22,9 +25,17 @@ export const AuthCard: React.FC = () => {
     }
 
 
-    const submitAuth = () => {
-        console.log('Authenticated successfully !!!')
+    const username = useAppSelector((state: RootState) => state.auth.username) as string
+    const password = useAppSelector((state: RootState) => state.auth.password) as string
+
+
+    const submitAuth = async () => {
+        const data = await authenticate({ username, password})
+        setData(data)
     }
+
+
+    console.log(data, 'TOKEN !!!')
 
     return (
         <Card sx={{ maxWidth: 400, margin: "auto", mt: 8, p: 2, boxShadow: 3 }}>

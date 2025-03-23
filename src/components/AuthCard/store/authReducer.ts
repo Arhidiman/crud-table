@@ -3,8 +3,8 @@ import type { UnknownAction } from "redux"
 
 
 const initialState = {
-    username: '',
-    password: ''
+    username: 'user13',
+    password: 'password'
 }
 
 interface IAuthState {

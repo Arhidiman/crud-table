@@ -4,11 +4,7 @@ import { Provider, useDispatch, useSelector, useStore } from 'react-redux'
 import { configureStore } from '@reduxjs/toolkit'
 import { rootReducer } from './rootReducer/rootReducer'
 import App from './App.tsx'
-
 import './index.css'
-
-
-
 
 const store = configureStore({reducer: rootReducer, devTools: true})
 
