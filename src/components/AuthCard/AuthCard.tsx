@@ -1,52 +1,67 @@
-import { Button, Card, CardContent, TextField, Typography } from "@mui/material";
-import { useState } from "react";
+import { Button, Card, CardContent, TextField, Typography } from "@mui/material"
+import { useAppDispatch, useAppSelector } from "@/main";
+import { SET_USERNAME, SET_PASSWORD } from "./store/actionsTypes";
+import type { ChangeEventHandler } from "react";
 
 export const AuthCard: React.FC = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
 
-  const handleLogin = () => {
-    console.log("Логин:", username);
-    console.log("Пароль:", password);
-    // Здесь можно добавить логику авторизации
-  };
+    const dispatch = useAppDispatch()
 
-  return (
-    <Card sx={{ maxWidth: 400, margin: "auto", mt: 8, p: 2, boxShadow: 3 }}>
-      <CardContent>
-        <Typography variant="h5" gutterBottom>
-          Вход
-        </Typography>
+    const auth = useAppSelector(state => state.auth)
 
-        <TextField
-          fullWidth
-          label="Имя пользователя"
-          variant="outlined"
-          margin="normal"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-        />
+    const setName: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e) => {
+        const element = e.target as HTMLInputElement
+        const value = element.value
+        dispatch({type: SET_USERNAME, payload: value})
+    }
 
-        <TextField
-          fullWidth
-          label="Пароль"
-          type="password"
-          variant="outlined"
-          margin="normal"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+    const setPassword: ChangeEventHandler<HTMLInputElement | HTMLTextAreaElement> = (e) => {
+        const element = e.target as HTMLInputElement
+        const value = element.value
+        dispatch({type: SET_PASSWORD, payload: value})
+    }
 
-        <Button
-          fullWidth
-          variant="contained"
-          color="primary"
-          sx={{ mt: 2 }}
-          onClick={handleLogin}
-        >
-          Войти
-        </Button>
-      </CardContent>
-    </Card>
-  );
+
+    const submitAuth = () => {
+        console.log('Authenticated successfully !!!')
+    }
+
+    return (
+        <Card sx={{ maxWidth: 400, margin: "auto", mt: 8, p: 2, boxShadow: 3 }}>
+            <CardContent>
+                <Typography variant="h5" gutterBottom>
+                Вход
+                </Typography>
+
+                <TextField
+                    fullWidth
+                    label="Имя пользователя"
+                    variant="outlined"
+                    margin="normal"
+                    value={auth.username}
+                    onChange={setName}
+                />
+
+                <TextField
+                    fullWidth
+                    label="Пароль"
+                    type="password"
+                    variant="outlined"
+                    margin="normal"
+                    value={auth.password}
+                    onChange={setPassword}
+                />
+
+                <Button
+                    fullWidth
+                    variant="contained"
+                    color="primary"
+                    sx={{ mt: 2 }}
+                    onClick={submitAuth}
+                >
+                    Войти
+                </Button>
+            </CardContent>
+        </Card>
+    )
 }
