@@ -1,5 +1,6 @@
 import React from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Paper } from "@mui/material";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Paper } from "@mui/material"
+import { useFetchTableItems } from "@/Hooks/useFetchTableItems"; 
 
 const rows = [
   { id: 1, name: "Документ 1", status: "Готово" },
@@ -11,6 +12,12 @@ export const DataTable: React.FC = () => {
   const handleClick = (id: any) => {
     console.log("Нажата кнопка для строки с id:", id);
   };
+
+
+  const { items, refetch } = useFetchTableItems()
+
+
+  console.log(items)
 
   return (
     <TableContainer component={Paper}>

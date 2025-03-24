@@ -11,6 +11,15 @@ const apiClient = axios.create({
     },
 })
 
+const token = localStorage.getItem('token') || ''
+
+apiClient.interceptors.request.use((config) => {
+    if (token && config.url !== routes.auth) {
+        config.headers['x-auth'] = token;
+    }
+    return config;
+});
+
 
 const routes = {
     auth: '/ru/data/v3/testmethods/docs/login',

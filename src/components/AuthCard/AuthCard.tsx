@@ -3,9 +3,12 @@ import { AppStore, RootState, useAppDispatch, useAppSelector } from "@/main";
 import { SET_USERNAME, SET_PASSWORD } from "./store/actionsTypes";
 import { authenticate } from "@/ApiClient/ApiClient";
 import { useState, type ChangeEventHandler } from "react";
+import { useNavigate } from "react-router";
+import { routes } from "@/AppRouter/routes";
 
 export const AuthCard: React.FC = () => {
 
+    const navigate = useNavigate()
     const [data, setData] = useState<any>(null)
 
     const dispatch = useAppDispatch()
@@ -30,8 +33,9 @@ export const AuthCard: React.FC = () => {
 
 
     const submitAuth = async () => {
-        const data = await authenticate({ username, password})
-        setData(data)
+        const token = await authenticate({ username, password})
+        localStorage.setItem('token', token)
+        token && navigate(routes.table)
     }
 
 
