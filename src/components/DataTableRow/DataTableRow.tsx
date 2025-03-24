@@ -2,13 +2,12 @@ import React from "react";
 import { TableCell, TableRow, Button } from "@mui/material"
 import type { ITableItemDto } from "@/ApiClient/dto";
 
-export const DataTableRow: React.FC<ITableItemDto> = (rowData) => {
+interface IControlTableRow extends ITableItemDto {
+    onDelete: (id: string) => void
+}
 
-
-    const handleClick = () => {
-      console.log('Удалить');
-    }
-
+export const DataTableRow: React.FC<IControlTableRow> = ({onDelete, ...rowData}) => {
+  
     const renderCells = (rowData: ITableItemDto) => {
         const cells = (Object.keys(rowData) as (keyof ITableItemDto)[]).map((key, i) => {
 
@@ -21,7 +20,7 @@ export const DataTableRow: React.FC<ITableItemDto> = (rowData) => {
         <TableRow>
             {renderCells(rowData)}
             <TableCell> 
-                <Button variant="contained" color="primary" onClick={() => handleClick()}>
+                <Button variant="contained" color="primary" onClick={() => onDelete(rowData.id)}>
                     Удалить
                 </Button>
             </TableCell>

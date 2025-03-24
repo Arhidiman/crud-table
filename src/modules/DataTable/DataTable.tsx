@@ -2,6 +2,7 @@ import React from "react";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Paper } from "@mui/material"
 import { useFetchTableItems } from "@/Hooks/useFetchTableItems"
 import { DataTableRow } from "@/components";
+import { deleteTableItem } from "@/ApiClient/ApiClient";
 import type { ITableItemDto } from "@/ApiClient/dto";
 
 const columns = [
@@ -27,6 +28,10 @@ export const DataTable: React.FC = () => {
         return columns.map((colName, i) => <TableCell key={i}>{colName}</TableCell>)
     }
     
+    const onDelete = async (id: string) => {
+        await deleteTableItem(id)
+        refetch()
+    }
 
     return (
       <TableContainer component={Paper}>
@@ -37,7 +42,7 @@ export const DataTable: React.FC = () => {
                   </TableRow>
               </TableHead>
               <TableBody>
-                  {items.map((rowDdata) => (<DataTableRow key={rowDdata.id}{...rowDdata}/>))}
+                  {items.map((rowDdata) => (<DataTableRow key={rowDdata.id}{...rowDdata} onDelete={onDelete}/>))}
               </TableBody>
           </Table>
       </TableContainer>
