@@ -1,8 +1,9 @@
-import React, { useState } from "react";
-import { RootState, useAppDispatch, useAppSelector } from "@/main";
-import { TableHead, Table, TableBody, TableCell, TableContainer, TableRow, TextField, Button, Paper, FormControl, FormHelperText, Typography } from "@mui/material";
-import { setRecordAction } from "@/pages";
+import React, { useState, useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/main";
+import { TableHead, Table, TableCell, TableContainer, TableRow, TextField, Button, Paper, FormControl, FormHelperText } from "@mui/material";
+import { setRecordAction, setTableItemsAction } from "@/pages";
 import { createTableItem } from "@/ApiClient/ApiClient";
+import { useFetchTableItems } from "@/Hooks/useFetchTableItems";
 import type { ITableItemDto } from "@/ApiClient/dto";
 
 const recordFieldsMap = {
@@ -17,20 +18,25 @@ const recordFieldsMap = {
 };
 
 export const TableRecordForm: React.FC = () => {
+
+
+    const { items, refetch } = useFetchTableItems()
+
+
     const dispatch = useAppDispatch();
     const record = useAppSelector((state) => state.tablePage.recordItem);
     const setRecord = (key: string, value: string) => {
-        dispatch(setRecordAction({ key, value }));
+        dispatch(setRecordAction({ key, value }))
     };
 
-    const [errors, setErrors] = useState<Record<string, string>>({});
-    const [isFormSubmitted, setIsFormSubmitted] = useState(false);
+    const [errors, setErrors] = useState<Record<string, string>>({})
+    const [isFormSubmitted, setIsFormSubmitted] = useState(false)
 
     const validate = () => {
         const newErrors: Record<string, string> = {};
         Object.keys(recordFieldsMap).forEach((key) => {
             if (!record[key as keyof Omit<ITableItemDto, 'id'>]) {
-                newErrors[key] = "Это поле обязательно для заполнения";
+                newErrors[key] = "Это поле обязательно для заполнения"
             }
         });
         setErrors(newErrors);
@@ -38,15 +44,21 @@ export const TableRecordForm: React.FC = () => {
     };
 
     const handleSave = async () => {
-        if (!validate()) return
         setIsFormSubmitted(true)
-        await createTableItem(record);
+        if (!validate()) return
+        await createTableItem(record)
+        refetch()
     }
 
     const tableHeaderCells = () => {
         return Object.values(recordFieldsMap).map((colName, i) => <TableCell key={i}>{colName}</TableCell>)
     }
-    
+
+    useEffect(() => {
+        dispatch(setTableItemsAction({ items }))
+    }, items)
+
+
     const formRow = () => {
         return Object.keys(recordFieldsMap).map(key => {
             return (

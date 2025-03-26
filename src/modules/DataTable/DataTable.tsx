@@ -1,9 +1,10 @@
 import React from "react";
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, Paper } from "@mui/material"
-import { useFetchTableItems } from "@/Hooks/useFetchTableItems"
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material"
+import { useAppDispatch, useAppSelector } from "@/main";
+import { setTableItemsAction } from "@/pages";
 import { DataTableRow } from "@/components";
-import { deleteTableItem } from "@/ApiClient/ApiClient";
-import type { ITableItemDto } from "@/ApiClient/dto";
+import { deleteTableItem, getTableItems } from "@/ApiClient/ApiClient"
+import type { ITableItemDto } from "../../ApiClient/dto";
 
 const columns = [
     'ID документа', 
@@ -20,9 +21,9 @@ const columns = [
 
 export const DataTable: React.FC = () => {
   
-    const { items, refetch } = useFetchTableItems()
+    const dispatch = useAppDispatch()
 
-    console.log(items)
+    const items = useAppSelector(state => state.tablePage.tableItems)
 
     const tableHeaderCells = () => {
         return columns.map((colName, i) => <TableCell key={i}>{colName}</TableCell>)
@@ -30,7 +31,8 @@ export const DataTable: React.FC = () => {
     
     const onDelete = async (id: string) => {
         await deleteTableItem(id)
-        refetch()
+        const tableItems = await getTableItems()
+        tableItems && dispatch(setTableItemsAction({items: tableItems}))
     }
 
     return (
@@ -42,7 +44,7 @@ export const DataTable: React.FC = () => {
                   </TableRow>
               </TableHead>
               <TableBody>
-                  {items.map((rowDdata) => (<DataTableRow key={rowDdata.id}{...rowDdata} onDelete={onDelete}/>))}
+                  {items.map((rowDdata: ITableItemDto) => (<DataTableRow key={rowDdata.id}{...rowDdata} onDelete={onDelete}/>))}
               </TableBody>
           </Table>
       </TableContainer>

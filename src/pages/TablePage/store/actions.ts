@@ -1,1 +1,2 @@
 export const SET_RECORD_DATA = 'SET_RECORD_DATA'
+export const SET_TABLE_ITEMS = 'SET_TABLE_ITEMS'
