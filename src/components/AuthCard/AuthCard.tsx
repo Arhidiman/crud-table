@@ -1,5 +1,5 @@
 import { Button, Card, CardContent, TextField, Typography } from "@mui/material"
-import { AppStore, RootState, useAppDispatch, useAppSelector } from "@/main";
+import { RootState, useAppDispatch, useAppSelector } from "@/main";
 import { SET_USERNAME, SET_PASSWORD } from "./store/actionsTypes";
 import { authenticate } from "@/ApiClient/ApiClient";
 import { useState, type ChangeEventHandler } from "react";
