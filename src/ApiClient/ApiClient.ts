@@ -51,7 +51,7 @@ export const getTableItems = async () => {
     }
 }
 
-export const createTableItem = async (itemData: ITableItemDto) => {
+export const createTableItem = async (itemData: Omit<ITableItemDto, 'id'>) => {
     try {
         const { data: responseData }= await apiClient.post(routes.create, itemData)
         const { data }: { data: ITableItemDto }  = responseData || {}

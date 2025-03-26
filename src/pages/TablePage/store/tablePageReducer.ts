@@ -25,7 +25,7 @@ export const tablePageReducer = (state: ITablePageState = initialState, action: 
     switch (action.type) {
         case SET_RECORD_DATA:
             return {
-                ...state, [action.payload.key]: action.payload.value
+                ...state, recordItem: {...state.recordItem, [action.payload.key]: action.payload.value}
             }
         default:
             return state
