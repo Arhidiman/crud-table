@@ -19,9 +19,7 @@ const recordFieldsMap = {
 
 export const TableRecordForm: React.FC = () => {
 
-
     const { items, refetch } = useFetchTableItems()
-
 
     const dispatch = useAppDispatch();
     const record = useAppSelector((state) => state.tablePage.recordItem);
