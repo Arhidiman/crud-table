@@ -44,8 +44,21 @@ export const tablePageReducer = (state: ITablePageState = initialState, action: 
             }
         case EDIT_RECORD:
             return {
-                ...state, editedRecord: { ...state.editedRecord, [action.payload.key]: action.payload.value}
+                ...state, tableItems: state.tableItems.map((item: ITableItemDto) => {
+                    if (action.payload.id === item.id) {
+                        return {
+                            ...item, [action.payload.key]: action.payload.value
+                        }
+                    } else {
+                        return item
+                    }
+                })
             }
+
+        // case EDIT_RECORD:
+        //     return {
+        //         ...state, editedRecord: { ...state.editedRecord, [action.payload.key]: action.payload.value}
+        //     }
         case SET_EDITED_RECORD_ID:
             return {
                 ...state, editedRecordId: action.payload.id
@@ -69,5 +82,5 @@ export const tablePageReducer = (state: ITablePageState = initialState, action: 
 export const setRecordAction = (payload: ISetRecordAction) => ({ type: SET_RECORD_DATA, payload })
 export const setTableItemsAction = (payload: {items: ITableItemDto[]}) => ({ type: SET_TABLE_ITEMS, payload })
 export const setEditedRecordAction = (payload: {editedRecord: ITableItemDto}) => ({ type: SET_EDITED_RECORD, payload })
-export const editRecordAction = (payload: {items: ITableItemDto[]}) => ({ type: EDIT_RECORD, payload })
+export const editRecordAction = (payload: {id: string, key: string, value: string}) => ({ type: EDIT_RECORD, payload })
 export const setEditedRecordId = (payload: {id: string}) => ({ type: SET_EDITED_RECORD_ID, payload })
