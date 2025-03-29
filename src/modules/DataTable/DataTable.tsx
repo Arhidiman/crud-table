@@ -62,9 +62,7 @@ export const DataTable: React.FC = () => {
     
     const onDelete = async (id: string) => {
         await deleteTableItem(id)
-        // setLoading(true)
         const tableItems = await getTableItems()
-        // setLoading(true)
         tableItems && dispatch(setTableItemsAction({items: tableItems}))
     }
     

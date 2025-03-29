@@ -62,8 +62,6 @@ const emptyValueValidate = (value: any) => value
 
 const dateValidate = (dateString: string) => {
     const date = new Date(dateString)
-
-    console.log(date, 'DATE')
     return !Number.isNaN(date.getTime())
 }
 

@@ -2,14 +2,13 @@ import { Button, Card, CardContent, TextField, Typography } from "@mui/material"
 import { RootState, useAppDispatch, useAppSelector } from "@/main";
 import { SET_USERNAME, SET_PASSWORD } from "./store/actionsTypes";
 import { authenticate } from "@/ApiClient/ApiClient";
-import { useState, type ChangeEventHandler } from "react";
+import { type ChangeEventHandler } from "react";
 import { useNavigate } from "react-router";
 import { routes } from "@/AppRouter/routes";
 
 export const AuthCard: React.FC = () => {
 
     const navigate = useNavigate()
-    const [data, setData] = useState<any>(null)
 
     const dispatch = useAppDispatch()
 
@@ -27,7 +26,6 @@ export const AuthCard: React.FC = () => {
         dispatch({type: SET_PASSWORD, payload: value})
     }
 
-
     const username = useAppSelector((state: RootState) => state.auth.username) as string
     const password = useAppSelector((state: RootState) => state.auth.password) as string
 
@@ -35,11 +33,10 @@ export const AuthCard: React.FC = () => {
     const submitAuth = async () => {
         const token = await authenticate({ username, password})
         localStorage.setItem('token', token)
+
+        alert(token)
         token && navigate(routes.table)
     }
-
-
-    console.log(data, 'TOKEN !!!')
 
     return (
         <Card sx={{ maxWidth: 400, margin: "auto", mt: 8, p: 2, boxShadow: 3 }}>
@@ -49,6 +46,7 @@ export const AuthCard: React.FC = () => {
                 </Typography>
 
                 <TextField
+                    error={!auth.username}
                     fullWidth
                     label="Имя пользователя"
                     variant="outlined"
@@ -58,6 +56,7 @@ export const AuthCard: React.FC = () => {
                 />
 
                 <TextField
+                    error={!auth.password}
                     fullWidth
                     label="Пароль"
                     type="password"
