@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
+import { Loader } from "@/ui/Loader/Loader";
+import { Notification } from "@/components";
 import { useAppDispatch, useAppSelector } from "@/main";
 import { TableHead, Table, TableCell, TableContainer, TableRow, TextField, Button, Paper, FormControl, FormHelperText } from "@mui/material";
 import { setRecordAction, setTableItemsAction } from "@/pages";
+import { setOpenNotification, setNotificationMessage, setNotificationSeverity } from "@/components/Notification/store/notificationReducer";
 import { createTableItem } from "@/ApiClient/ApiClient";
 import { useFetchTableItems } from "@/Hooks/useFetchTableItems";
 import type { ITableItemDto } from "@/ApiClient/dto";
@@ -19,7 +22,10 @@ const recordFieldsMap = {
 
 export const TableRecordForm: React.FC = () => {
 
+    const buttonStyle = {width: '150px', height: '45px'}
+
     const { items, refetch } = useFetchTableItems()
+    const [creating, setIsCreating] = useState<boolean>(false)
 
     const dispatch = useAppDispatch();
     const record = useAppSelector((state) => state.tablePage.recordItem);
@@ -29,6 +35,11 @@ export const TableRecordForm: React.FC = () => {
 
     const [errors, setErrors] = useState<Record<string, string>>({})
     const [isFormSubmitted, setIsFormSubmitted] = useState(false)
+
+
+    const notificationState = useAppSelector(state => state.notification)
+    const { open, severity, message } = notificationState
+
 
     const validate = () => {
         const newErrors: Record<string, string> = {};
@@ -41,10 +52,29 @@ export const TableRecordForm: React.FC = () => {
         return Object.keys(newErrors).length === 0;
     };
 
+    const setNotificationState = (open: boolean, severity?: 'success' | 'error', message?: string) => {
+        dispatch(setOpenNotification({ open }))
+        severity && dispatch(setNotificationSeverity({ severity }))
+        message && dispatch(setNotificationMessage({ message }))
+    }
+  
+    const onCloseNotification = () => {
+        dispatch(setOpenNotification({ open }))
+    }
+
     const handleSave = async () => {
         setIsFormSubmitted(true)
         if (!validate()) return
-        await createTableItem(record)
+        setIsCreating(true)
+
+        try { 
+            await createTableItem(record)
+            setNotificationState(true, 'success', 'Запись добавлена !')
+        } catch(err: any) {
+            setNotificationState(true, 'error', err.message)
+        }
+
+        setIsCreating(false)
         refetch()
     }
 
@@ -53,8 +83,11 @@ export const TableRecordForm: React.FC = () => {
     }
 
     useEffect(() => {
-        dispatch(setTableItemsAction({ items }))
-    }, items)
+
+        console.log(items, 'ITEMS')
+
+        items && dispatch(setTableItemsAction({ items }))
+    }, [items])
 
 
     const formRow = () => {
@@ -74,22 +107,25 @@ export const TableRecordForm: React.FC = () => {
     }
 
     return (
-        <TableContainer component={Paper}>
-        <Table>
-            <TableHead>
-                <TableRow>
-                    {tableHeaderCells()}
-                </TableRow>
-            </TableHead>
-            <TableRow>
-                {formRow()}
-                <TableCell> 
-                    <Button variant="contained" color="primary" onClick={handleSave}>
-                        Создать запись
-                    </Button>
-                </TableCell>
-            </TableRow>
-        </Table>
-    </TableContainer>
+        <>
+            <Notification open={open} message={message} severity={severity} handleClose={onCloseNotification}/>
+            <TableContainer component={Paper} style={{ marginBottom: '30px'}}>
+                <Table>
+                    <TableHead>
+                        <TableRow>
+                            {tableHeaderCells()}
+                        </TableRow>
+                    </TableHead>
+                    <TableRow>
+                        {formRow()}
+                        <TableCell> 
+                            <Button variant="contained" color="primary" onClick={handleSave} style={buttonStyle}>
+                                {creating ? <Loader/> : 'Создать запись'}
+                            </Button>
+                        </TableCell>
+                    </TableRow>
+                </Table>
+            </TableContainer>
+        </>
     )
 }

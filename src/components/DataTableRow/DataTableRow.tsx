@@ -1,8 +1,10 @@
 import React, { ChangeEvent, useState } from "react";
 import { TableCell, TableRow, Button, TextField } from "@mui/material"
 import { Loader } from "@/ui/Loader/Loader";
+import { Notification } from "@/components/Notification/ui/Notification";
 import { useAppDispatch, useAppSelector } from "@/main";
 import { editRecordAction, setEditedRecordId } from "@/pages/TablePage/store/tablePageReducer";
+import { setOpenNotification, setNotificationMessage, setNotificationSeverity } from "../Notification/store/notificationReducer";
 import { getDateFromISO } from "@/utils";
 import { updateTableItem } from "@/ApiClient/ApiClient";
 import type { ITableItemDto } from "@/ApiClient/dto";
@@ -20,8 +22,10 @@ export const DataTableRow: React.FC<IControlTableRow> = ({onDelete, ...rowData})
 
     const dispatch = useAppDispatch()
     const tablePageState = useAppSelector(state => state.tablePage)
-    const { editedRecordId } = tablePageState
+    const notificationState = useAppSelector(state => state.notification)
 
+    const { editedRecordId } = tablePageState
+    const { open, severity, message } = notificationState
 
     const [saving, setIsSaving] = useState<boolean>(false)
     const [deleting, setIsDeleting] = useState<boolean>(false)
@@ -34,17 +38,38 @@ export const DataTableRow: React.FC<IControlTableRow> = ({onDelete, ...rowData})
         switchEditable(id)
     }
 
+    const setNotificationState = (open: boolean, severity?: 'success' | 'error', message?: string) => {
+        dispatch(setOpenNotification({ open }))
+        severity && dispatch(setNotificationSeverity({ severity }))
+        message && dispatch(setNotificationMessage({ message }))
+    }
+
+    const onCloseNotification = () => {
+        setNotificationState(false)
+    }
+
     const saveRecord = async (id: string) => {
         const editedRecord = tablePageState.tableItems.find((item: ITableItemDto) => item.id === id)
         setIsSaving(true)
-        await updateTableItem(id, editedRecord)
+        try { 
+            await updateTableItem(id, editedRecord)
+            setNotificationState(true, 'success', 'Запись обновлена !')
+        } catch(err: any) {
+            setNotificationState(true, 'error', err.message)
+        }
+
         setIsSaving(false)
         switchEditable('')
     }
 
     const deleteRecord = async (id: string) => {
         setIsDeleting(true)
-        await onDelete(id)
+        try { 
+            await onDelete(id)
+            setNotificationState(true, 'success', 'Запись удалена !')
+        } catch(err: any) {
+            setNotificationState(true, 'error', err.message)
+        }
         setIsDeleting(false)
     }
 
@@ -55,29 +80,25 @@ export const DataTableRow: React.FC<IControlTableRow> = ({onDelete, ...rowData})
     }
 
     const renderCells = (rowData: ITableItemDto) => {
-        const cells = (Object.keys(rowData) as (keyof ITableItemDto)[]).map((key, i) => {
-            if (requiredFields.some(field => field === key)) {
-                return rowData.id === editedRecordId
-                  ? <TableCell key={i}>
-                        <TextField 
-                            size="small" 
-                            value={rowData[key]} 
-                            onChange={(e) => editTableItemsList(e, rowData.id, key)}
-                        >
-                            {rowData[key]}
-                        </TextField>
-                    </TableCell>
-                  : <TableCell key={i}>{rowData[key]}</TableCell>
-            }
-            return <TableCell key={i}>
-                      {
-
-                          dateKeys.some(field => field === key) ? getDateFromISO(rowData[key]) : rowData[key]
-                      } 
-                    </TableCell>
-        })
-        return cells
-    }
+      const cells = (Object.keys(rowData) as (keyof ITableItemDto)[]).map((key, i) => {
+          if (requiredFields.some(field => field === key)) {
+              return rowData.id === editedRecordId
+                  ? <TableCell key={i} style={{width: '250px', padding: '4px'}}>
+                      <TextField 
+                          size="small" 
+                          value={rowData[key]} 
+                          onChange={(e) => editTableItemsList(e, rowData.id, key)} 
+                          fullWidth
+                      />
+                  </TableCell>
+                  : <TableCell key={i} style={{width: '250px', padding: '4px'}}>{rowData[key]}</TableCell>
+          }
+          return <TableCell key={i} style={{width: '250px', padding: '4px'}}>
+                    {dateKeys.some(field => field === key) ? getDateFromISO(rowData[key]) : rowData[key]}
+                 </TableCell>
+      })
+      return cells
+  }
 
 
     const editButton = (
@@ -87,26 +108,36 @@ export const DataTableRow: React.FC<IControlTableRow> = ({onDelete, ...rowData})
     )
 
     const saveButton = (
-      <Button variant="contained" color="primary" onClick={() => saveRecord(rowData.id)} style={buttonStyle}>
-          { saving ? <Loader/> : 'Сохранить'}
-      </Button>
+        <Button variant="contained" color="primary" onClick={() => saveRecord(rowData.id)} style={buttonStyle}>
+            { saving ? <Loader/> : 'Сохранить' }
+        </Button>
     )
 
+    const deleteButton = (
+        <Button 
+            variant="contained" 
+            color="primary" 
+            onClick={() => deleteRecord(rowData.id)} 
+            style={buttonStyle}
+        >
+            { deleting ? <Loader/> : 'Удалить' }
+        </Button>
+    )
     
     return (  
+      <>
+        <Notification open={open} message={message} severity={severity} handleClose={onCloseNotification}/>
         <TableRow style={{height: '100px'}}>
-            {renderCells(rowData)}
-            <TableCell> 
-                {
-                    rowData.id !== editedRecordId ? editButton : saveButton
-                }
-            </TableCell>
-            <TableCell>
-              <Button variant="contained" color="primary" onClick={() => deleteRecord(rowData.id)} style={buttonStyle}>
-                  { deleting ? <Loader/> : 'Удалить'}
-              </Button>
-            </TableCell>
-        </TableRow>
+              {renderCells(rowData)}
+              <TableCell> 
+                  { rowData.id !== editedRecordId ? editButton : saveButton }
+              </TableCell>
+              <TableCell>
+                  {deleteButton}
+              </TableCell>
+          </TableRow>
+      </>
+      
     )
 }
 

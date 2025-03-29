@@ -1,9 +1,12 @@
-import React from "react";
+import React, { useEffect } from "react";
+import { ProgressBar } from "../../ui/ProgressBar/ProgressBar";
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material"
 import { useAppDispatch, useAppSelector } from "@/main";
 import { setTableItemsAction } from "@/pages";
-import { DataTableRow } from "@/components";
+import { DataTableRow, Notification } from "@/components";
+import { setOpenNotification, setNotificationMessage, setNotificationSeverity } from "@/components/Notification/store/notificationReducer";
 import { deleteTableItem, getTableItems } from "@/ApiClient/ApiClient"
+import { useFetchTableItems } from "@/Hooks/useFetchTableItems";
 import type { ITableItemDto } from "../../ApiClient/dto";
 
 const columns = [
@@ -26,29 +29,75 @@ export const DataTable: React.FC = () => {
 
     const items = useAppSelector(state => state.tablePage.tableItems)
 
+    const { loading, error } = useFetchTableItems()
+
+    const notificationState = useAppSelector(state => state.notification)
+    const { open, severity, message } = notificationState
+
+    const setNotificationState = (open: boolean, severity?: 'success' | 'error', message?: string) => {
+        dispatch(setOpenNotification({ open }))
+        severity && dispatch(setNotificationSeverity({ severity }))
+        message && dispatch(setNotificationMessage({ message }))
+    } 
+  
+    // console.log(items, 'ITEMS')
+
+    useEffect(() => {
+        if (error) {
+            setNotificationState(true, 'error', error)
+        }
+    }, [items])
+
+    useEffect(() => {
+        if (!items) {
+            setNotificationState(true, 'error', 'Отсутствуют данные таблицы')
+        } 
+    }, [items])
+     
+
+    // if (error) {
+    //   alert(error)
+    //   dispatch(setOpenNotification({ open: true }))
+    //   dispatch(setNotificationSeverity({ severity: 'error' }))
+    //   dispatch(setNotificationMessage({ message: error }))
+    // }
+
+    const onCloseNotification = () => {
+        dispatch(setOpenNotification({ open: false }))
+    }
+
     const tableHeaderCells = () => {
-        return columns.map((colName, i) => <TableCell key={i}>{colName}</TableCell>)
+        return columns.map((colName, i) => <TableCell key={i} style={{width: '250px'}}>{colName}</TableCell>)
     }
     
     const onDelete = async (id: string) => {
         await deleteTableItem(id)
+        // setLoading(true)
         const tableItems = await getTableItems()
+        // setLoading(true)
         tableItems && dispatch(setTableItemsAction({items: tableItems}))
     }
+    
 
     return (
-      <TableContainer component={Paper}>
-          <Table>
-              <TableHead>
-                  <TableRow>
-                      {tableHeaderCells()}
-                  </TableRow>
-              </TableHead>
-              <TableBody>
-                  {items.map((rowDdata: ITableItemDto) => (<DataTableRow key={rowDdata.id}{...rowDdata} onDelete={onDelete}/>))}
-              </TableBody>
-          </Table>
-      </TableContainer>
+      <>
+        <Notification open={open} severity={severity} message={message} handleClose={onCloseNotification}/>
+          {
+              loading ? <ProgressBar/>
+              : <TableContainer component={Paper}>
+                    <Table>
+                        <TableHead>
+                            <TableRow>
+                                {tableHeaderCells()}
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {items && items.map((rowDdata: ITableItemDto) => (<DataTableRow key={rowDdata.id}{...rowDdata} onDelete={onDelete}/>))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+          }
+      </>
     )
 }
 

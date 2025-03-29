@@ -11,14 +11,15 @@ const apiClient = axios.create({
     },
 })
 
-const token = localStorage.getItem('token') || ''
-
-apiClient.interceptors.request.use((config) => {
-    if (token && config.url !== routes.auth) {
-        config.headers['x-auth'] = token;
-    }
-    return config;
-});
+const useXAuthHeader = () => {
+    const token = localStorage.getItem('token') || ''
+    apiClient.interceptors.request.use((config) => {
+        if (token && config.url !== routes.auth) {
+            config.headers['x-auth'] = token;
+        }
+        return config;
+    });
+}
 
 
 const routes = {
@@ -30,6 +31,7 @@ const routes = {
 }
 
 export const authenticate = async ({ username, password }: IAuthDto) => {
+    useXAuthHeader()
     try {
         const { data: responseData } = await apiClient.post(routes.auth, { username, password })
         const { data }: {data: IAuthDataDto}  = responseData || {}
@@ -42,16 +44,25 @@ export const authenticate = async ({ username, password }: IAuthDto) => {
 }
 
 export const getTableItems = async () => {
+    useXAuthHeader()
+
+    // console.log(token, 'CHECK TOKEN')
     try {
         const { data: responseData }= await apiClient.get(routes.tableData);
         const { data }: {data: ITableItemDto[]}  = responseData || {}
-        return data
+
+        if (responseData.error_code === 0) {
+            console.log(responseData, 'res data')
+
+            return data
+        }         
     } catch (error) {
         throw error;
     }
 }
 
 export const createTableItem = async (itemData: Omit<ITableItemDto, 'id'>) => {
+    useXAuthHeader()
     try {
         const { data: responseData }= await apiClient.post(routes.create, itemData)
         const { data }: { data: ITableItemDto }  = responseData || {}
@@ -65,9 +76,10 @@ export const createTableItem = async (itemData: Omit<ITableItemDto, 'id'>) => {
 }
 
 export const deleteTableItem = async (id: string) => {
+    useXAuthHeader()
     try {
         const { data: responseData } = await apiClient.post(`${routes.delete}/${id}`)
-
+        
         if (responseData.err_code === 0) {
             return id
         }
@@ -77,6 +89,7 @@ export const deleteTableItem = async (id: string) => {
 }
 
 export const updateTableItem = async (id: string, itemData: ITableItemDto) => {
+    useXAuthHeader()
     try {
         const { data: responseData }  = await apiClient.post(`${routes.set}/${id}`, itemData)
 

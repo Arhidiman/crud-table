@@ -3,7 +3,7 @@ import { getTableItems } from "@/ApiClient/ApiClient"
 import type { ITableItemDto } from "@/ApiClient/dto"
 
 interface IFetchTableItem {
-    items: ITableItemDto[],
+    items: ITableItemDto[] | [] | undefined,
     loading: boolean,
     error: string | null,
     refetch: () => void
@@ -11,7 +11,7 @@ interface IFetchTableItem {
 
 export const useFetchTableItems = (): IFetchTableItem => {
 
-    const [items, setItems] = useState<ITableItemDto[] | []>([])
+    const [items, setItems] = useState<ITableItemDto[] | [] | undefined>([])
     const [loading, setLoading] = useState<boolean>(true)
     const [error, setError] = useState<string | null>(null)
 
