@@ -33,8 +33,6 @@ export const AuthCard: React.FC = () => {
     const submitAuth = async () => {
         const token = await authenticate({ username, password})
         localStorage.setItem('token', token)
-
-        alert(token)
         token && navigate(routes.table)
     }
 
