@@ -4,12 +4,13 @@ import type { UnknownAction } from "redux"
 
 const initialState = {
     username: 'user13',
-    password: 'password'
+    password: 'password',
 }
 
 interface IAuthState {
     username: string,
-    password: string
+    password: string,
+  
 }
 
 export const authReducer = (state: IAuthState = initialState, action: UnknownAction) => {

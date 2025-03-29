@@ -40,8 +40,6 @@ export const DataTable: React.FC = () => {
         message && dispatch(setNotificationMessage({ message }))
     } 
   
-    // console.log(items, 'ITEMS')
-
     useEffect(() => {
         if (error) {
             setNotificationState(true, 'error', error)
@@ -53,14 +51,6 @@ export const DataTable: React.FC = () => {
             setNotificationState(true, 'error', 'Отсутствуют данные таблицы')
         } 
     }, [items])
-     
-
-    // if (error) {
-    //   alert(error)
-    //   dispatch(setOpenNotification({ open: true }))
-    //   dispatch(setNotificationSeverity({ severity: 'error' }))
-    //   dispatch(setNotificationMessage({ message: error }))
-    // }
 
     const onCloseNotification = () => {
         dispatch(setOpenNotification({ open: false }))

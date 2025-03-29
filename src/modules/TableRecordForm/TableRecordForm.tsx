@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { Loader } from "@/ui/Loader/Loader";
 import { Notification } from "@/components";
 import { useAppDispatch, useAppSelector } from "@/main";
-import { TableHead, Table, TableCell, TableContainer, TableRow, TextField, Button, Paper, FormControl, FormHelperText } from "@mui/material";
-import { setRecordAction, setTableItemsAction } from "@/pages";
+import { TableHead, Table, TableCell, TableContainer, TableRow, TextField, Button, Paper } from "@mui/material";
+import { setRecordAction, setTableItemsAction, validateRecordFormAction } from "@/pages";
 import { setOpenNotification, setNotificationMessage, setNotificationSeverity } from "@/components/Notification/store/notificationReducer";
 import { createTableItem } from "@/ApiClient/ApiClient";
 import { useFetchTableItems } from "@/Hooks/useFetchTableItems";
@@ -28,29 +28,16 @@ export const TableRecordForm: React.FC = () => {
     const [creating, setIsCreating] = useState<boolean>(false)
 
     const dispatch = useAppDispatch();
-    const record = useAppSelector((state) => state.tablePage.recordItem);
+    const record = useAppSelector((state) => state.tablePage.recordItem)
+    const validity = useAppSelector((state) => state.tablePage.validation)
+
     const setRecord = (key: string, value: string) => {
         dispatch(setRecordAction({ key, value }))
     };
 
-    const [errors, setErrors] = useState<Record<string, string>>({})
-    const [isFormSubmitted, setIsFormSubmitted] = useState(false)
-
-
     const notificationState = useAppSelector(state => state.notification)
     const { open, severity, message } = notificationState
 
-
-    const validate = () => {
-        const newErrors: Record<string, string> = {};
-        Object.keys(recordFieldsMap).forEach((key) => {
-            if (!record[key as keyof Omit<ITableItemDto, 'id'>]) {
-                newErrors[key] = "Это поле обязательно для заполнения"
-            }
-        });
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
 
     const setNotificationState = (open: boolean, severity?: 'success' | 'error', message?: string) => {
         dispatch(setOpenNotification({ open }))
@@ -63,8 +50,9 @@ export const TableRecordForm: React.FC = () => {
     }
 
     const handleSave = async () => {
-        setIsFormSubmitted(true)
-        if (!validate()) return
+        const allFieldsValid = Object.keys(validity).every(key => validity[key as keyof Omit<ITableItemDto, 'id'>].valid)
+
+        if (!allFieldsValid) return
         setIsCreating(true)
 
         try { 
@@ -89,18 +77,26 @@ export const TableRecordForm: React.FC = () => {
         items && dispatch(setTableItemsAction({ items }))
     }, [items])
 
+    useEffect(() => {
+        dispatch(validateRecordFormAction())
+    }, [record])
+
 
     const formRow = () => {
         return Object.keys(recordFieldsMap).map(key => {
+
+
+            const error = !validity[key as keyof Omit<ITableItemDto, 'id'> ].valid
+            const errorMessage = validity[key as keyof Omit<ITableItemDto, 'id'> ].errorMessage
+
             return (
                 <TableCell>
-                    <FormControl fullWidth error={isFormSubmitted && Boolean(errors[key])} variant="outlined" size="small">
-                        <TextField
-                            required
-                            onChange={(e) => setRecord(key, e.target.value)}
-                        />
-                        {isFormSubmitted && errors[key] && <FormHelperText>{errors[key]}</FormHelperText>}
-                    </FormControl>
+                    <TextField
+                        label={error && errorMessage}
+                        error={error}
+                        required
+                        onChange={(e) => setRecord(key, e.target.value)}
+                    />
                 </TableCell>
             )
         })
