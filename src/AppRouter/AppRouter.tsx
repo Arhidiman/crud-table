@@ -7,7 +7,7 @@ import { routes } from "./routes"
 
 export const AppRouter = () => {
     return (
-        <Router basename="/crud-table">
+        <Router >
             <AppHeader/>
             <Routes>
                 <Route path={routes.auth} element={<AuthPage/>}/>
