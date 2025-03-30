@@ -62,7 +62,9 @@ const emptyValueValidate = (value: any) => value
 
 const dateValidate = (dateString: string) => {
     const date = new Date(dateString)
-    return !Number.isNaN(date.getTime())
+    if(Number.isNaN(date.getTime())) return false
+    const dateReg = /^(0[1-9]|[12][0-9]|3[01])\.(0[1-9]|1[0-2])\.\d{4}$/;
+    return dateReg.test(dateString)
 }
 
 const validationFunctions = {
@@ -104,8 +106,6 @@ export const tablePageReducer = (state: ITablePageState = initialState, action: 
                 })
             }
         case SET_EDITED_RECORD_ID:
-
-            console.log(action.payload, 'A;DSFJLKA;DSF')
             return {
                 ...state, editedRecordId: action.payload.id
             }

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Loader } from "@/ui/Loader/Loader";
 import { Notification } from "@/components";
 import { useAppDispatch, useAppSelector } from "@/main";
-import { TableHead, Table, TableCell, TableContainer, TableRow, TextField, Button, Paper } from "@mui/material";
+import { TableHead, TableBody, Table, TableCell, TableContainer, TableRow, TextField, Button, Paper } from "@mui/material";
 import { setRecordAction, setTableItemsAction, validateRecordFormAction } from "@/pages";
 import { setOpenNotification, setNotificationMessage, setNotificationSeverity } from "@/components/Notification/store/notificationReducer";
 import { createTableItem } from "@/ApiClient/ApiClient";
@@ -71,9 +71,6 @@ export const TableRecordForm: React.FC = () => {
     }
 
     useEffect(() => {
-
-        console.log(items, 'ITEMS')
-
         items && dispatch(setTableItemsAction({ items }))
     }, [items])
 
@@ -85,12 +82,11 @@ export const TableRecordForm: React.FC = () => {
     const formRow = () => {
         return Object.keys(recordFieldsMap).map(key => {
 
-
             const error = !validity[key as keyof Omit<ITableItemDto, 'id'> ].valid
             const errorMessage = validity[key as keyof Omit<ITableItemDto, 'id'> ].errorMessage
 
             return (
-                <TableCell>
+                <TableCell key={key}>
                     <TextField
                         label={error && errorMessage}
                         error={error}
@@ -112,14 +108,17 @@ export const TableRecordForm: React.FC = () => {
                             {tableHeaderCells()}
                         </TableRow>
                     </TableHead>
-                    <TableRow>
-                        {formRow()}
-                        <TableCell> 
-                            <Button variant="contained" color="primary" onClick={handleSave} style={buttonStyle}>
-                                {creating ? <Loader/> : 'Создать запись'}
-                            </Button>
-                        </TableCell>
-                    </TableRow>
+
+                    <TableBody>
+                        <TableRow>
+                            {formRow()}
+                            <TableCell> 
+                                <Button variant="contained" color="primary" onClick={handleSave} style={buttonStyle}>
+                                    {creating ? <Loader/> : 'Создать запись'}
+                                </Button>
+                            </TableCell>
+                        </TableRow>
+                    </TableBody>
                 </Table>
             </TableContainer>
         </>

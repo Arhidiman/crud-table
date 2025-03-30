@@ -46,14 +46,11 @@ export const authenticate = async ({ username, password }: IAuthDto) => {
 export const getTableItems = async () => {
     useXAuthHeader()
 
-    // console.log(token, 'CHECK TOKEN')
     try {
         const { data: responseData }= await apiClient.get(routes.tableData);
         const { data }: {data: ITableItemDto[]}  = responseData || {}
 
         if (responseData.error_code === 0) {
-            console.log(responseData, 'res data')
-
             return data
         }         
     } catch (error) {
